@@ -1,0 +1,10 @@
+paramiko
+requests
+yagmail
+IPy
+redis
+pymongo
+pandas
+scapy
+scapy_http
+docker==3.1.4
