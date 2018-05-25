@@ -22,17 +22,16 @@ apt-get install fprobe
 ```
 * scapy, scapy_http, paramiko, pandas, IPy
 ### Installing
-1.  `cp chickenfarm.cfg.default chickenfarm.cfg`
-2. Generate keys used by ssh server
+1. Generate keys used by ssh server
   * run `mkdir data`
   * run `ssh-keygen -t rsa`, and put them in `data/`
   * run `ssh-keygen -t dsa`, and put them in `data/`
-3. Install python requirements
+2. Install python requirements
   * run `pip install -r requirements`
-4. Configure the banner of ssh server
+3. Configure the banner of ssh server
   * Edit banner in chickenfarm.cfg
   * It should be same with the ssh banner of sshd contaniner
-5. Configure the farm 
+4. Configure the farm 
   * Edit file_keyword in chickenfarm.cfg. For example if you use a 32bit i386 system, you need to edit it to  `ELF 32-bit LSB, executable, Intel 80386`. If you don't know your system's kernel information, run `uname -a` to see
   * you also can edit the configure of the database if you need
 ## Running

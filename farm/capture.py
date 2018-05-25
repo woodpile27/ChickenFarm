@@ -59,9 +59,9 @@ class FileCapture(object):
     def get_from_redis(self):
         while True:
             try:
-		data = REDIS.lpop(self.docker_name)
-	    except Exception:
-		print 'get from redis error'
+                data = REDIS.lpop(self.docker_name)
+            except Exception:
+                print 'get from redis error'
             if data:
                 pkt = Ether(data)
                 self.parse(pkt)
@@ -127,8 +127,8 @@ class FileCapture(object):
             f.write(data)
         sha256 = self.file_SHA256(data)
         file_type = self.file_type(file_name)
-        self.save_to_mongo(file_infor, sha256, file_type)
-        self.check_file_type(file_type)
+        flag = self.check_file_type(file_type)
+        self.save_to_mongo(file_infor, sha256, file_type, flag)
 
     def file_SHA256(self, data):
         hsha = hashlib.sha256()
@@ -144,8 +144,9 @@ class FileCapture(object):
             if keyword.strip() not in file_type:
                 return None
         self.evt.set()
+        return 1
 
-    def save_to_mongo(self, data, sha256, file_type):
+    def save_to_mongo(self, data, sha256, file_typei, flag):
         import time
         time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         result = {
@@ -156,7 +157,8 @@ class FileCapture(object):
                 'name': data['name'],
                 'time': time,
                 'sha256': sha256,
-                'type': file_type
+                'type': file_type,
+                'flag': flag
                 }
         try:
             if mongodb[MONGO_TABLE1].insert(result):
@@ -243,7 +245,7 @@ class DDosMonitor(object):
             srcip_ent = self.calcShannonEnt(srcip_group)
             maxsrcip_pub = IPY(srcip_group.idxmax()).iptype() == 'PUBLIC'
             dstip_ent = self.calcShannonEnt(df[df.prot == max_prot].groupby('dstip')['dpkts'].agg('sum'))
-            tcpflags_df = dst_df.groupby('tcpFlags')['dpkts'].agg('sum').apply(lambda x:x/float(pkts))
+            tcpflags_df = dst_df.groupby('tcpFlags')['dpkts'].agg('sum')
             max_tcpflag = tcpflags_df.idxmax()
             #max_tcpflag = tcpflags_df.max()
             fake_ip = 'yes' if srcip_ent > 4 or (srcip_ent < 0.8 and maxsrcip_pub) else 'no'
@@ -352,7 +354,7 @@ class C2Monitor(object):
                         ans[name] = 0
                     ans[name] += 1
             else:
-                if pcap.qdcount > 0 and ininstance(pcap.qd, DNSQR):
+                if pcap.qdcount > 0 and isinstance(pcap.qd, DNSQR):
                     name = pcap.qd.qname
                     if name not in qry.keys():
                         qry[name] = 0
@@ -360,13 +362,13 @@ class C2Monitor(object):
         return sorted(ans.keys())[-1], sorted(qry.keys())[-1]
 
     def save_to_mongo(self, server):
-        if instance(server, tuple):
+        if isinstance(server, tuple):
             result = {'C2domain': server}
         else:
             result = {'C2ip': server}
         try:
             if mongodb[MONGO_TABLE1].find_one_and_update(
-                {'docker_ip': self.docker_ip}, {'$set': result}):
+                {'docker_ip': self.docker_ip, 'flag': 1}, {'$set': result}):
                 print 'save to mongo successd'
         except Exception:
             print 'save to mongo errorrrr'
