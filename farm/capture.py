@@ -34,12 +34,13 @@ TREE = {'protocol': {'icmp': 'ICMP_FLOOD','udp': {'isamp': {'yes': {'dstport': U
 
 class FileCapture(object):
 
-    def __init__(self, docker_name, docker_ip, evt):
+    def __init__(self, docker_name, docker_ip, evt, tServer):
         self.iface = 'docker0'
         self.docker_name = docker_name
         self.docker_ip = docker_ip
         self.file_list = {}
         self.evt = evt
+	self.tServer = tServer
 
     def change_docker(self, new_name, docker_ip):
         self.docker_name = new_name
@@ -72,7 +73,7 @@ class FileCapture(object):
         id = "%s:%d" % (pkt[IP].dst, pkt[TCP].dport)
         if HTTP.HTTPRequest in pkt:
             id = "%s:%d" % (pkt[IP].src, pkt[TCP].sport)
-            hacker_ip = cfg.get("wetland", "hacker_ip")
+            hacker_ip = self.tServer.cfg.get("wetland", "hacker_ip")
             path = pkt.Host + pkt.Path
             file_name = pkt.Path.split('/')[-1]
             file_name = str(random.randrange(1000,9999)) if file_name == '' else file_name
@@ -146,7 +147,7 @@ class FileCapture(object):
         self.evt.set()
         return 1
 
-    def save_to_mongo(self, data, sha256, file_typei, flag):
+    def save_to_mongo(self, data, sha256, file_type, flag):
         import time
         time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         result = {

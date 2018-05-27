@@ -13,7 +13,7 @@ class Management(object):
         self.tcpServer = tcpServer
         self.docker_ip ,self.docker_iface = self.create()
         self.evt = threading.Event()
-        self.file_capture = FileCapture('Wetland 1', self.docker_ip, self.evt)
+        self.file_capture = FileCapture('Wetland 1', self.docker_ip, self.evt, tcpServer)
         self.docker_count = 1
         self.flow_port = 9995
 
