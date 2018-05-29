@@ -40,7 +40,7 @@ class FileCapture(object):
         self.docker_ip = docker_ip
         self.file_list = {}
         self.evt = evt
-	self.tServer = tServer
+        self.tServer = tServer
 
     def change_docker(self, new_name, docker_ip):
         self.docker_name = new_name
@@ -64,8 +64,11 @@ class FileCapture(object):
             except Exception:
                 print 'get from redis error'
             if data:
-                pkt = Ether(data)
-                self.parse(pkt)
+                try:
+                    pkt = Ether(data)
+                    self.parse(pkt)
+                except Exception, e:
+                    print e
             else:
                 time.sleep(2)
 
@@ -209,8 +212,8 @@ class DDosMonitor(object):
         df = pd.DataFrame(datas , columns=columns)
         #flownum = float(df.shape[1])
         #expectation = df.groupby('prot').size().apply(lambda x: x*x/flownum).sum()
-        total_bytes = df['dOctets'].sum()
-        if total_bytes > THRESHOLD:
+        total_pkts = df['dpkts'].sum()
+        if total_pkts > THRESHOLD:
             self.analysis(df)
 
 
@@ -335,6 +338,8 @@ class C2Monitor(object):
 
     def check(self, timelist):
         N = len(timelist)
+        if N == 0:
+            return None
         S = sum(timelist)
         min = timelist[0]
         max = timelist[-1]
