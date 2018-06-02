@@ -93,7 +93,8 @@ class ssh_server(paramiko.ServerInterface):
             service_thread = threading.Thread(target=services.shell_service,
                                               args=(hacker_session,
                                                     docker_session,
-                                                    self.opt))
+                                                    self.opt, 
+						    self.hacker_ip, self.cfg))
             service_thread.setDaemon(True)
             service_thread.start()
 

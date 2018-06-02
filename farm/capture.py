@@ -41,6 +41,7 @@ class FileCapture(object):
         self.file_list = {}
         self.evt = evt
         self.tServer = tServer
+	REDIS.flushdb()
 
     def change_docker(self, new_name, docker_ip):
         self.docker_name = new_name
@@ -65,10 +66,10 @@ class FileCapture(object):
                 print 'get from redis error'
             if data:
                 try:
-                    pkt = Ether(data)
-                    self.parse(pkt)
+		    pkt = Ether(data)
+		    self.parse(pkt)
                 except Exception, e:
-                    print e
+		    print e
             else:
                 time.sleep(2)
 
@@ -99,11 +100,15 @@ class FileCapture(object):
             if Raw in pkt:
                 load = str(pkt[Raw].load)
                 data = {'seq': seq, 'data': load}
-                self.file_list[id].update({
-                                   'now_length': len(load),
-                                   'datas': [data]
-                                   })
-                if len(load) == content_leng:
+		if self.file_list[id].has_key('datas'):
+		    self.file_list[id]['datas'].append(data)
+		    self.file_list[id]['now_length'] += len(load)
+		else:
+                    self.file_list[id].update({
+                                       'now_length': len(load),
+                                       'datas': [data]
+                                       })
+                if self.file_list[id]['now_length'] == content_leng:
                     self.save_to_file(self.file_list[id])
             else:
                 self.file_list[id].update({
@@ -113,13 +118,19 @@ class FileCapture(object):
         elif Raw in pkt and pkt.sport == 80:
             seq = pkt.seq
             ack = pkt.ack
-            if id in self.file_list.keys() and ack == self.file_list[id]['ack']:
+            if id in self.file_list.keys():
                 load = str(pkt[Raw].load)
                 data = {'seq': seq, 'data': load}
-                self.file_list[id]['datas'].append(data)
-                self.file_list[id]['now_length'] += len(load)
-                if self.file_list[id]['now_length'] == self.file_list[id]['file_length']:
-                    self.save_to_file(self.file_list[id])
+		if self.file_list[id].has_key('datas'):
+                    self.file_list[id]['datas'].append(data)
+		    self.file_list[id]['now_length'] += len(load)
+		else:
+		    self.file_list[id]['datas'] = [data]
+                    self.file_list[id]['now_length'] = len(load)
+		if self.file_list[id].has_key('ack'):
+                    if self.file_list[id]['now_length'] == self.file_list[id]['file_length']:
+                        self.save_to_file(self.file_list[id])
+		        self.file_list.pop(id)
         else:
             pass
 

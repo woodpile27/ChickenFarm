@@ -35,7 +35,6 @@ class tcp_handler(SocketServer.BaseRequestHandler):
 
         transport.set_subsystem_handler('sftp', paramiko.SFTPServer,
                                         sftpServer.sftp_server)
-        self.server.cfg.set("wetland", "hacker_ip", self.client_address[0])
         nw = network.network(self.client_address[0],
                     self.server.cfg.get("wetland", "docker_addr"))
         nw.create()

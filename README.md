@@ -32,8 +32,7 @@ apt-get install fprobe
   * Edit banner in chickenfarm.cfg
   * It should be same with the ssh banner of sshd contaniner
 4. Configure the farm 
-  * Edit file_keyword in chickenfarm.cfg. For example if you use a 32bit i386 system, you need to edit it to  `ELF 32-bit LSB, executable, Intel 80386`. If you don't know your system's kernel information, run `uname -a` to see
-  * you also can edit the configure of the database if you need
+  * you can edit the configure of the database if you need
 ## Running
 1. Run
   * run `nohup python main.py &`

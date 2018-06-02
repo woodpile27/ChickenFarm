@@ -26,7 +26,6 @@ class Management(object):
         while True:
             if self.evt.isSet():
                 self.evt.clear()
-                time.sleep(50)
                 self.change()
 
     def create(self):
